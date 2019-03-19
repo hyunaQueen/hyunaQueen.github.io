@@ -17,9 +17,9 @@ remote_theme : mmistakes/minimal-mistakes
 
 # Site Settings
 locale                   : "en-US"
-title                    : "Site Title"
+title                    : "Android Framework"
 title_separator          : "-"
-name                     : "Your Name"
+name                     : "Kim HyunA"
 description              : "An amazing website."
 url                      : "https://hyunaQueen.github.io" # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
 baseurl                  : "" # the subpath of your site, e.g. "/blog"
