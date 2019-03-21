@@ -1,22 +1,51 @@
 ---
-title: "안드로이드 "
+title: "안드로이드 프레임워크 공부 1일차 - 1"
 date: 2019-03-21 10:04:28 -0400
 categories: Android Framework
 ---
-You’ll find this post in your `_posts` directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run `jekyll serve`, which launches a web server and auto-regenerates your site when a file is updated.
+This is an H1
+-------------
+안드로이드 프레임워크 개요
 
-To add new posts, simply add a file in the `_posts` directory that follows the convention `YYYY-MM-DD-name-of-post.ext` and includes the necessary front matter. Take a look at the source for this post to get an idea about how it works.
+안드로이드 프레임워크를 제대로 이해하지 않아도 안드로이드 애플리케이션을 개발할 수 있다.
+하지만 안드로이드 플랫폼 개발자라면 안드로이드 프레임워크에 대한 심도 있는 이해는 필수다.
+안드로이드는 오픈소스로 제공되므로 각자 기본 안드로이드 프레임워크를 커스터마이즈하여 차별화된 제품을 만들 수 있다.
 
-Jekyll also offers powerful support for code snippets:
+This is an H2
+-------------
+1.1 안드로이드 소스 코드 구조
 
-​```python
-def print_hi(name):
-  print("hello", name)
-print_hi('Tom')
-​```
+안드로이드의 주요 소스 코드 구성
+kernel : 안드로이드의 리눅스 커널 2.6
+bionic : 안드로이드 표준 C 라이브러리
+bootloader : 참고용 안드로이드 부트로더
+build : 안드로이드 빌드 시스템
+cts : 안드로이드 호환성 테스트 관련 소스
+dalvik : 달빅 가상 머신
+external : 안드로이드에서 사용하는 오픈소스들
+frameworks : 안드로이드 프레임워크
+hardware : 안드로이드 HAL(Hardware Abstraction Layer)소스
+packages : 안드로이드 기본 애플리케이션, 컨텐트 프로바이더 등
+system : 안드로이드 init 프로세스, 블루투스 도구 모음 등
 
-Check out the [Jekyll docs][jekyll-docs] for more info on how to get the most out of Jekyll. File all bugs/feature requests at [Jekyll’s GitHub repo][jekyll-gh]. If you have questions, you can ask them on [Jekyll Talk][jekyll-talk].
+This is an H2
+-------------
+1.2 부팅 프로세스로 알아보는 안드로이드 프레임워크
 
-[jekyll-docs]: https://jekyllrb.com/docs/home
-[jekyll-gh]:   https://github.com/jekyll/jekyll
-[jekyll-talk]: https://talk.jekyllrb.com/
+프로그램의 최초 시작점인 main()함수부터 차근차근 따라해보자.
+안드로이드 부팅과정
+(1)리눅스 커널
+안드로이드는 리눅스 기반의 플랫폼이기 때문에 리눅스 커널이 부팅되고 커널 초기화를 수행 후 마지막 과정에서 init 프로세스를 호출한다.
+(2)init
+안드로이드 init 프로세스는 각종 디바이스를 초기화하는 작업과 프레임워크 동작에 필요한 각종 데몬, 컨텍트 매니저, 미디어 서버, Zygote등을 실행하는 역할을 수행한다.
+(3)컨텍스트 매니저
+컨텍스트 매니저는 안드로이드의 시스템 서비스를 관리하는 중요한 프로세스이다. 시스템 서비스는 프레임워크를 구성하는 중요한 컴포넌트로서 카메라, 오디오, 비디오 처리부터 중요 API를 제공하는 등의 역할을 수행한다.
+(4)미디어 서버
+미디어 서버 프로세스는 안드로이드에서 오디오 출력이나 Camera서비스와 같이 C/C++기반으로 작성되어 있는 네이티브 시스템을 실행하는 역할을 한다.
+(5)Zygote
+애플리케이션의 로딩 시간을 단축하기 위한 프로세스로서 모든 자바 기반 안드로이드 애플리케이션은 Zygote를 통해 fork된 프로세스 상에서 동작한다.
+(6)시스템 서버
+Zygote에서 fork된 후 최초로 실행되는 안드로이드 애플리케이션 프로세스이다.
+시스템 서버는 애플리케이션 생명 주기를 제어하는 Activity Manager Service나 단말기의 위치 정보를 제공하는 Location Manager Service와 같은 자바 시스템 서비스를 싱행하는 역할을 한다.
+
+여기까지가 1장의 내용이다. 사실 1장은 안드로이드 프레임워크 개요이기 때문에 간단히 책내용을 읽어보고 요약해보는것으로 공부했다.
