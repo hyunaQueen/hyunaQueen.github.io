@@ -24,3 +24,8 @@ JniFuncMain.h 헤더 파일
 <img src="https://user-images.githubusercontent.com/48199401/55969477-d2177000-5cb8-11e9-89f2-ff0d700c8ffa.PNG">
 <img src="https://user-images.githubusercontent.com/48199401/55969520-e3f91300-5cb8-11e9-8338-1fc17cd15a06.PNG">
 헤더파일이 생성된 모습
+
+jnifunc.cpp 파일
+-------------
+헤더파일 정보를 바탕으로 jnifunc.cpp을 만들어 보자. 
+<imp src="https://user-images.githubusercontent.com/48199401/55971085-bfeb0100-5cbb-11e9-8798-71a82fd2324f.PNG">
