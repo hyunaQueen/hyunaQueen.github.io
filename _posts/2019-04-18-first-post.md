@@ -79,7 +79,8 @@ int main(int argc, const char* const argv[])
     
 ZygoteInit 클래스의 기능
 -------------
-```public static void main(String argv[]){
+```
+public static void main(String argv[]){
   try {
     //새로운 안드로이드 애플리케이션의 실행 요청을 받기 위한 소켓 바인딩
     registerZygoteSocket();
