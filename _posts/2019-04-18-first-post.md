@@ -38,7 +38,7 @@ app_process로부터 ZygoteInit class실행
 
 ### AppRuntime 객체 생성
 * **app_process**실행 규칙
-```app_process [java-options] cmd-dir start-class-name [options]```
+> app_process [java-options] cmd-dir start-class-name [options]
 * [java-options] : 가상 머신으로 전달되는 옵션, 반드시 '-'로 시작되어야 한다.
 * cmd-dir : 프로젝트가 실행될 디렉터리
 * start-class-name : 가상머신에서 생설할 클래스의 이름. app_process는 전달받은 클래스를 가상 머신으로 로딩한 후 해당 클래스의 main()메서드를 호출
