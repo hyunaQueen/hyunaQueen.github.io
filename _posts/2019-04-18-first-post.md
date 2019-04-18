@@ -111,13 +111,21 @@ ZygoteInit 클래스의 기능
 ```
 
 ### /dev/socket/zygote 소켓 바인딩
-
+Zygote클래스의 main()메서드는 가장 먼저 registerZygoteSocket()메서드를 호출한다.
+* System.getenv() 메서드를 호출해서 환경변수로 등록한 소켓의 파일 디스크립터를 가져온다. 
+* 파일 디스크립터 값을 이용해 LocalServerSocket클래스의 인스턴스를 생성하고 /dev/socket/zygote와 바인딩
 
 ### 애플리케이션 프레임워크에 속한 클래스와 플랫폼 자원의 로딩
-
+***preloadClasses***
+* 미리 메모리에 클래스들을 로딩해 놓아 새로운 애플리케이션이 실행될때 시작속도를 빠르게 해준다.
+***preloadResources***
+* 문자열, 색, 이미지 파일, 사운드 파일등을 리소스 파일로 관리된다.
+* 리소스는 리스템 리소스와 애플리케이션 리소스로 나뉘는데 시스템 리소스에 접근하려면 getSystem() 정적 메서드에서 반환하는 객체 
 
 ### SystemServer 실행
-
+Zygote에서 달빅 가상 머신을 구동한 이후, 시스템 서버(SystemServer)라는 자바 서비스를 실행하기 위해 새로운 달빅 가상 머신 인스턴스를 생성한다. 
+* startSystemServer()메소드에서 새로운 프로세스 실행
+* forkSystemServer()메소드에서 생성한 시스템 서버 프로세스의 동작 여부 확인
 
 ### 새로운 안드로이드 애플리케이션 실행
-
+시스템 서버가 실행되고 나면 앞서 바인딩한 소켓으로 들어오는 요청을 처리하기 위한 루프가 실행된다. ZYGOTE_FORK_MODE가 false로 되어있으므로 ***runSelectLoopMode()***메서드 호출 이 메서드는 zygote프로세스가 종료 될때까지 반환되지 않는다.
