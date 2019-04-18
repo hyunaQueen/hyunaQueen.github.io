@@ -32,8 +32,18 @@ Init 프로세스 실행 -> Daemon (Native Services)실행 -> Zygote 프로세�
 
 app_process로부터 ZygoteInit class실행
 -------------
+* Zygote는 자바로 작성되어 있기 때문에 다른 네이티브 서비스나 데몬과 같이 init프로세스에서 바로실행 불가능
+* 자바로 작성돼 있는 Zygote 클래스가 동작하려면 달빅 가상 머신이 생성돼야 하고, 생성된 가상머신 위에서 ZygoteInit클래스를 로딩하고 실행해야 한다.
+  - 이러한 작업을 수행하는 프로세스가 바로**app_process**
 
-
+### AppRuntime 객체 생성
+* **app_process**실행 규칙
+```app_process [java-options] cmd-dir start-class-name [options]```
+* [java-options] : 가상 머신으로 전달되는 옵션, 반드시 '-'로 시작되어야 한다.
+* cmd-dir : 프로젝트가 실행될 디렉터리
+* start-class-name : 가상머신에서 생설할 클래스의 이름. app_process는 전달받은 클래스를 가상 머신으로 로딩한 후 해당 클래스의 main()메서드를 호출
+* [options] : 실행될 클래스로 전달될 옵션
+  
 ZygoteInit 클래스의 기능
 -------------
 
