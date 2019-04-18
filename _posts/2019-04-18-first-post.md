@@ -43,7 +43,42 @@ app_process로부터 ZygoteInit class실행
 * cmd-dir : 프로젝트가 실행될 디렉터리
 * start-class-name : 가상머신에서 생설할 클래스의 이름. app_process는 전달받은 클래스를 가상 머신으로 로딩한 후 해당 클래스의 main()메서드를 호출
 * [options] : 실행될 클래스로 전달될 옵션
+
+### AppRuntime 객체 실행
+```
+int main(int argc, const char* const argv[])
+{
+  ...
+  if(i < argc) {
+    arg = argv[i++];
+    if (0 == strcmp("--zygote",arg)) {      -------(1)
+      bool startSystemServer = (i < argc) ?
+        strcmp(argv[i], "--start-system-server") == 0 : false;
+      setArgv0(argv0, "zygote");
+      set_process_name("zygote");           -------(2)
+      runtime.start("com.android.internal.os.ZygoteInit",
+                    startServer);           -------(3)
+    } else {
+      ...
+    }
+    ...
+  }
+}
+```
+(1) 에서 실행할 클래스의 이름을 확인한다. 실행할 클래스의 이름이 '--zygote'이냐에 따라 처리 과정이 조금 달라지지만 가상 머신상에서 클래스를 로딩한다는 점은 같다.
+(3) 에서 AppRuntime의 start()멤버 함수를 호출하면 비로서 가상 머신이 생성되고 초기화된다. 생성된 가상머신에 ZygoteInit클래스를 로딩하고 main()메서드로 실행흐름이 바뀐다.
+
+### 달빅 가상 머신의 생성
+* 가상 머신의 실행 옵션을 설정하기 위해 property_get()함수 호출
+  - int property_get(const char *key, char *value, const char *default_value)
+* JNI_CreateJavaVM() 함수를 통해 달빌 가상 머신을 생성하고 실행
+  - jint JNI_CreateJavaVM(JavaNM** p_vm, JNIEnv** p_env, void* vm_args)
+    + JavVM **pVm : 생성된 JavaVM 클래스의 인스턴스에 대한 포인터
+    + JNIEnv **p_env : 가상 머신에 접근하기 위한 JNIEnv 클래스의 인스턴스에 대한 포인터
+    + void *vm_args : 지금까지 설정한 가상 머신의 옵션
   
+### ZygoteInit 클래스의   
+
 ZygoteInit 클래스의 기능
 -------------
 
