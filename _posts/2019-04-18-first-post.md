@@ -76,11 +76,48 @@ int main(int argc, const char* const argv[])
     + JavVM **pVm : 생성된 JavaVM 클래스의 인스턴스에 대한 포인터
     + JNIEnv **p_env : 가상 머신에 접근하기 위한 JNIEnv 클래스의 인스턴스에 대한 포인터
     + void *vm_args : 지금까지 설정한 가상 머신의 옵션
-  
-### ZygoteInit 클래스의   
-
+    
 ZygoteInit 클래스의 기능
 -------------
+```public static void main(String argv[]){
+  try {
+    //새로운 안드로이드 애플리케이션의 실행 요청을 받기 위한 소켓 바인딩
+    registerZygoteSocket();
+    ...
+    //안드로이드 애플리케이션 프레임워크에서 사용할 클래스와 리소스를 로딩
+    preloadClasses();
+    preloadResources();
+    ...
+    //SystemServer 실행
+    if (argv[1].equals("true")) {
+      startSystemServer();
+    }
+    ...
+    if (ZYGOTE_FORK_MODE){
+      startSystemServer();
+    } else {
+      //새로운 안드로이드 애플리케이션 실행 요청을 처리
+      runSelectLoopMode();
+    }
+    closeServerSocket();
+  }catch(MethodAndArgsCaller caller){
+    caller.run();
+  } catch(RuntimeException ex){
+    Log.e(TAG, "Zygote died with exception", ex);
+    closeServerSocket();
+    throw ex;
+  }
+}
+```
+
+### /dev/socket/zygote 소켓 바인딩
 
 
+### 애플리케이션 프레임워크에 속한 클래스와 플랫폼 자원의 로딩
+
+
+### SystemServer 실행
+
+
+### 새로운 안드로이드 애플리케이션 실행
 
