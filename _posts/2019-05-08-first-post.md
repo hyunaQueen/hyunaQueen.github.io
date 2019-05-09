@@ -103,7 +103,7 @@ bindService(Intent, ServiceConnection, int)API의 첫 번째 인자는 LocalServ
 * ISecondary.java : ISecondary.aidl파일을 참조해 안드로이드가 자동으로 생생해주는 파일. ISecondary 인터페이스를 기반으로 액티비티와 서비스가 서로 통신할 수 있게끔 마샬링/언마샬링 수행
 
 <img src="https://user-images.githubusercontent.com/48199401/57470626-3d5a5f00-72c4-11e9-9921-fc17f5a3796c.jpg">
-(1) Bingding 액티비티 : RemoteService와의 연결 요청
+(1) Binding 액티비티 : RemoteService와의 연결 요청
 ```
         private OnClickListener mBindListener = new OnClickListener() {
             public void onClick(View v) {
@@ -142,7 +142,7 @@ bindService(Intent, ServiceConnection, int)API의 첫 번째 인자는 LocalServ
 ```
 서비스 바인더 객체는 자동으로 생성된 ISecondary.java의 ISecondary.Stub클래스를 통해 생성한다. 이때 ISecondary 인터페이스에 정의된 getPid()메서드의 실제 코드를 구현한다. getPid()의 구현에서는 서비스의 프로세스 ID를 반환한다.
 
-(3) Bingding 액티비티 : 서비스와 바인더 IPC를 수행하기 위한 프록시 객체 생성
+(3) Binding 액티비티 : 서비스와 바인더 IPC를 수행하기 위한 프록시 객체 생성
 ```
         private ServiceConnection mSecondaryConnection = new ServiceConnection() {
             public void onServiceConnected(ComponentName className, IBinder service) {
@@ -152,7 +152,7 @@ bindService(Intent, ServiceConnection, int)API의 첫 번째 인자는 LocalServ
 ```
 프레임워크는 bindService()의 두 번째 인자로 넘긴 연결 객체의 onServiceConnected()콜백 메서드를 호출. 이때 두 번째로 인자로 전달되는 IBinder 타입의 service객체를 ISecondary.Stub.asInterface()함수의 인자로 전달해서 호출 함으로서 ISecond.Stub.Prox 서비스 프록시 객체가 생성되고 mSecondaryService 멤버 변수에 저장된다.
 
-(4) Bingding 액티비티 : 서비스 프록시 객체를 이용해서 RemoteService 서비스의 getPid() 서비스 프록시 메서드 호출
+(4) Binding 액티비티 : 서비스 프록시 객체를 이용해서 RemoteService 서비스의 getPid() 서비스 프록시 메서드 호출
 ```
         private OnClickListener mKillListener = new OnClickListener() {
             public void onClick(View v) {
@@ -169,3 +169,18 @@ bindService(Intent, ServiceConnection, int)API의 첫 번째 인자는 LocalServ
 (6) RemoteService 서비스 : RemoteService 서비스의 getPid() 스텁 메서드 호출
 바인더 IPC데이터를 수신한 ISecond.Stub서비스 바인더 객체는 (2)에서 구현한 실제 getPid()스텁 메서드를 호출함으로써 서비스의 프로세스 ID를 액티비티에 반환한다.
 
+안드로이드 시스템 서비스
+-------------
+안드로이드 프레임워크에서 애플리케이션 프레임워크 레이어 및 라이브러리 레이어에 각각 존재한다.
+
+### 시스템 서비스의 분류
+* 네이티브 시스템 서비스
+* Audio Flinger 서비스
+* Surface Flinger 서비스
+* 자바 시스템 서비스
+* 코어 플랫폼 서비스
+* 하드웨어 서비스
+* 자바 시스템 서비스 이용
+
+시스템 서비스의 
+-------------
