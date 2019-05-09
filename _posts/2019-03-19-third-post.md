@@ -1,5 +1,5 @@
 ---
-title: "안드로이드 프레임워크 공부 1차 - 3"
+title: "안드로이드 프레임워크 공부 1주차 - 3"
 date: 2019-03-21 17:10:48 -0400
 categories: Android Framework init
 ---
