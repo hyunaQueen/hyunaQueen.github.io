@@ -182,5 +182,5 @@ bindService(Intent, ServiceConnection, int)API의 첫 번째 인자는 LocalServ
 * 하드웨어 서비스
 * 자바 시스템 서비스 이용
 
-시스템 서비스의 
+시스템 서비스의 실행
 -------------
