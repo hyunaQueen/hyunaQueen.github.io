@@ -12,3 +12,8 @@ categories: Android Framework
 
 안드로이드 서비스 분류
 -------------
+<img src="https://user-images.githubusercontent.com/48199401/57457449-89000f00-72aa-11e9-8b5c-678a55d09a57.png">
+안드로이드 서비스는 크게 프레임워크에서 기본제공하는 시스템 서비스와 애플리케이션 개발자가 Service클래스를 상속해서 구현한 애플리케이션 서비스로 구분된다.
+
+안드로이드 애플리케이션 서비스
+-------------
