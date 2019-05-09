@@ -101,3 +101,71 @@ bindService(Intent, ServiceConnection, int)API의 첫 번째 인자는 LocalServ
 * RemoteService.java : RemoteService 서비스 외에 RemoteService를 이용하는 두 액티비티인 Controller와 Binding이 각각 내부 클래스로 선언돼 있다.
 * ISecondary.aidl : 액티비티와 서비스 통신을 위한 인터페이스 정의
 * ISecondary.java : ISecondary.aidl파일을 참조해 안드로이드가 자동으로 생생해주는 파일. ISecondary 인터페이스를 기반으로 액티비티와 서비스가 서로 통신할 수 있게끔 마샬링/언마샬링 수행
+
+<img src="https://user-images.githubusercontent.com/48199401/57470626-3d5a5f00-72c4-11e9-9921-fc17f5a3796c.jpg">
+(1) Bingding 액티비티 : RemoteService와의 연결 요청
+```
+        private OnClickListener mBindListener = new OnClickListener() {
+            public void onClick(View v) {
+                Intent intent = new Intent(Binding.this, RemoteService.class);
+                intent.setAction(IRemoteService.class.getName());
+                bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+                intent.setAction(ISecondary.class.getName());
+                bindService(intent, mSecondaryConnection, Context.BIND_AUTO_CREATE);
+                mIsBound = true;
+                mCallbackText.setText("Binding.");
+            }
+        };
+```
+로컬 서비스와 비슷하게 bindService()에서 첫 번째 인자에 리모트 서비스를 실행하기 위한 인텐트가 전달된다.
+
+(2) RemoteService 서비스 : 실제 서비스 메서드 기능 구현 및 서비스와 통신하기 위한 바인더 객체 제공
+```
+    private final ISecondary.Stub mSecondaryBinder = new ISecondary.Stub() {
+        public int getPid() {
+            return Process.myPid();
+        }
+        public void basicTypes(int anInt, long aLong, boolean aBoolean,
+                float aFloat, double aDouble, String aString) {
+        }
+    };
+    
+    public IBinder onBind(Intent intent) {
+        if (IRemoteService.class.getName().equals(intent.getAction())) {
+            return mBinder;
+        }
+        if (ISecondary.class.getName().equals(intent.getAction())) {
+            return mSecondaryBinder;
+        }
+        return null;
+    }
+```
+서비스 바인더 객체는 자동으로 생성된 ISecondary.java의 ISecondary.Stub클래스를 통해 생성한다. 이때 ISecondary 인터페이스에 정의된 getPid()메서드의 실제 코드를 구현한다. getPid()의 구현에서는 서비스의 프로세스 ID를 반환한다.
+
+(3) Bingding 액티비티 : 서비스와 바인더 IPC를 수행하기 위한 프록시 객체 생성
+```
+        private ServiceConnection mSecondaryConnection = new ServiceConnection() {
+            public void onServiceConnected(ComponentName className, IBinder service) {
+                mSecondaryService = ISecondary.Stub.asInterface(service);
+            }
+        };
+```
+프레임워크는 bindService()의 두 번째 인자로 넘긴 연결 객체의 onServiceConnected()콜백 메서드를 호출. 이때 두 번째로 인자로 전달되는 IBinder 타입의 service객체를 ISecondary.Stub.asInterface()함수의 인자로 전달해서 호출 함으로서 ISecond.Stub.Prox 서비스 프록시 객체가 생성되고 mSecondaryService 멤버 변수에 저장된다.
+
+(4) Bingding 액티비티 : 서비스 프록시 객체를 이용해서 RemoteService 서비스의 getPid() 서비스 프록시 메서드 호출
+```
+        private OnClickListener mKillListener = new OnClickListener() {
+            public void onClick(View v) {
+                int pid = mSecondaryService.getPid();
+                Process.killProcess(pid);
+            }
+        };
+```
+'Kill Process'버튼을 누르면 서비스 프록시 객체의 getPid()서비스 프록시 메서드가 호출된다. 액티비티는 서비스 프로세스를 Process.killProcess()메서드를 통해 강제 종료한다.
+
+(5) 바인더 IPC : 서비스 프록시 객체(ISecond.Stub.Proxy)에서 서비스 바인더 객체(ISecond.Stub)로 바인더 IPC 데이터 전달
+(4)에서 호출된 getPid()프록시 메서드의 처리를 위해 데이터를 ISecond.Stub.Proxy리모트 프록시 객체에서 바인더 IPC를 통해 ISecond.Stub서비스 바인더 객체로 전달된다.
+
+(6) RemoteService 서비스 : RemoteService 서비스의 getPid() 스텁 메서드 호출
+바인더 IPC데이터를 수신한 ISecond.Stub서비스 바인더 객체는 (2)에서 구현한 실제 getPid()스텁 메서드를 호출함으로써 서비스의 프로세스 ID를 액티비티에 반환한다.
+
