@@ -37,7 +37,7 @@ categories: Android Framework
 자바 서비스 프레임워크는 바인더 RPC를 지원하기 위해 JNI를 통해 네이티브 서비스 프레임워크의 기능을 재사용하므로 서비스 클라이언트와 서비스 서버 내부의 구성요소 간에 수직 방향으로 이뤄지는 상호작용 역시 두 프레임워크 사이에 차이점이 있다.
 <img src="https://user-images.githubusercontent.com/48199401/58267653-048bb100-7dbf-11e9-8fad-2f519553b6ce.PNG">
 1. 서비스 등록 요청(서비스)
-**네이티브 서비스 프레임워크**에서 서비스를 시스템에 등록할 때는 네이티브 서비스 매니저인 BpServiceManager를 통해 서비스 등록 과정을 처리했지만 **자바 서비스 프레임워크**는 자바 서비스 매니저인 ServciceManager를 이용해 처리한다. 
+* **네이티브 서비스 프레임워크**에서 서비스를 시스템에 등록할 때는 네이티브 서비스 매니저인 BpServiceManager를 통해 서비스 등록 과정을 처리했지만 **자바 서비스 프레임워크**는 자바 서비스 매니저인 ServciceManager를 이용해 처리한다. 
 
 2. 서비스 등록(서비스 매니저)
 * ServiceManagerProxy 서비스 프록시는 addService() 메서드의 호출 정보를 RPC 데이터로 변환한다.
