@@ -23,7 +23,7 @@ categories: Android Framework
 <img src="https://user-images.githubusercontent.com/48199401/58266020-d22c8480-7dbb-11e9-8424-bc8d203396b8.PNG">
 
 1. 서비스 레이어
-시스템 서비스 개발자는 애플리케이션 개발자가 시스템 서비스를 이용할 수 있게 SDK에 래퍼 클래스를 포함시켜야 한다.
+* 시스템 서비스 개발자는 애플리케이션 개발자가 시스템 서비스를 이용할 수 있게 SDK에 래퍼 클래스를 포함시켜야 한다.
 
 2. RPC 레이어
 * 자바 서비스 프레임워크는 안드로이드 플랫폼에 포함된 AIDL언어와 컴파일러를 이용해 서비스 프록시와 서비스 스텁을 자동으로 생성한다.
@@ -40,19 +40,19 @@ categories: Android Framework
 **네이티브 서비스 프레임워크**에서 서비스를 시스템에 등록할 때는 네이티브 서비스 매니저인 BpServiceManager를 통해 서비스 등록 과정을 처리했지만 **자바 서비스 프레임워크**는 자바 서비스 매니저인 ServciceManager를 이용해 처리한다. 
 
 2. 서비스 등록(서비스 매니저)
-ServiceManagerProxy 서비스 프록시는 addService() 메서드의 호출 정보를 RPC 데이터로 변환한다.
+* ServiceManagerProxy 서비스 프록시는 addService() 메서드의 호출 정보를 RPC 데이터로 변환한다.
 
 3. 서비스 검색 요청(서비스 사용자)
-자바 서비스 사용자는 SDK에서 제공하는 getSystemService()메서드를 호출해서 서비스를 검색한다.
+* 자바 서비스 사용자는 SDK에서 제공하는 getSystemService()메서드를 호출해서 서비스를 검색한다.
 
 4. 서비스 검색(서비스 매니저)
-getSystemService()는 ServiceManager의 getService() 메서드를 호출해서 시스템에서 FooService서비스를 검색한다. 
+* getSystemService()는 ServiceManager의 getService() 메서드를 호출해서 시스템에서 FooService서비스를 검색한다. 
 
 5. foo() 서비스 프록시 메서드 호출(서비스 사용자)
-서비스 사용자는 FooManage의 foo()메소드를 호출한다.
+* 서비스 사용자는 FooManage의 foo()메소드를 호출한다.
 
 6. foo() 서비스 스텁 메서드 실행(서비스)
-BBinder는 바인더 드라이버로부터 바인더 RPC데이터를 전달받아 JavaBBinder를 통해 Binder의 execTransact() 메서드를 호출한다.
+* BBinder는 바인더 드라이버로부터 바인더 RPC데이터를 전달받아 JavaBBinder를 통해 Binder의 execTransact() 메서드를 호출한다.
 
 동작 메커니즘
 -------------
