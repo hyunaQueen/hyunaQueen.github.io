@@ -50,7 +50,8 @@ categories: Android Framework
 즉, 액티비티에서 호출한 startServie() API는 자바 서비스 프레임워크 기반에서 바인더 RPC형태로 액티비티 매니저 서비스에 제공하는 startService() 스텁 메소드를 호출한다.
 <img src="https://user-images.githubusercontent.com/48199401/58648983-f3eeb400-8345-11e9-8fbc-23fe6e3c4baa.jpg">
 1. Controller 액티비티(ActivityManagerProxy 객체의 startService()프록시 메서드를 호출)
- * (a) ContextWrapper 클래스 - ContextImpl 객체의 startService() 메서드 
+(a) ContextWrapper 클래스 - ContextImpl 객체의 startService() 메서드 
+ 
 ```
 public class ContextWrapper extends Context {
     // mBase 멤버 변수에 저장된 Context 객체를 래핑(wrapping)
@@ -62,10 +63,12 @@ public class ContextWrapper extends Context {
         return mBase.startService(service); //ContextImpl 객체의 startServier() 호출
     }
 }
+
 ```
 
 * 액티비티에서 startService() API를 호출하면 Activity 클래스가 상속하는 ContextWrapper 클래스의 startService가 호출된다. 
-* (b) ContextImpl 클래스 - startService() 메서드 처리
+
+(b) ContextImpl 클래스 - startService() 메서드 처리
  
 ```
     public ComponentName startService(Intent service) {
