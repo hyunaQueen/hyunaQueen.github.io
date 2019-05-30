@@ -50,7 +50,185 @@ categories: Android Framework
 즉, 액티비티에서 호출한 startServie() API는 자바 서비스 프레임워크 기반에서 바인더 RPC형태로 액티비티 매니저 서비스에 제공하는 startService() 스텁 메소드를 호출한다.
 <img src="https://user-images.githubusercontent.com/48199401/58648983-f3eeb400-8345-11e9-8fbc-23fe6e3c4baa.jpg">
 1. Controller 액티비티(ActivityManagerProxy 객체의 startService()프록시 메서드를 호출)
- a) ContextWrapper 클래스 - ContextImpl 객체의 startService() 메서드 
+ * (a) ContextWrapper 클래스 - ContextImpl 객체의 startService() 메서드 
+```
+public class ContextWrapper extends Context {
+    // mBase 멤버 변수에 저장된 Context 객체를 래핑(wrapping)
+    // 안드로이드 애플리케이션 실행 시에 mBase에는
+    // 이미 Controller 액티비티의 ContextImpl 객체가 저장되어 있음.
+    Context mBase;
+    
+    public ComponentName startService(Intent service) {
+        return mBase.startService(service); //ContextImpl 객체의 startServier() 호출
+    }
+}
+```
+액티비티에서 startService() API를 호출하면 Activity 클래스가 상속하는 ContextWrapper 클래스의 startService가 호출된다. 
+ * (b) ContextImpl 클래스 - startService() 메서드 처리
+```
+    public ComponentName startService(Intent service) {
+        Component cn = ActivityManagerNative.getDefault().startService(
+                             mMainThread.getApplicationThread(), service,
+                             service.resolveTypeIfNeeded(getContentResolver()));
+        
+        return cn;
+    }
+```
+ContextImpl은 Context 추상 클래스를 실제 구현한 클래스로서 애플리케이션 자체의 리소스 접근, 액티비티나 애플리케이션 서비스 실행, 인텐트 송수신 등의 역할을 수행
+<img src="https://user-images.githubusercontent.com/48199401/58651660-ceb17400-834c-11e9-878f-f3b28f3e5807.jpg">
+ActivityManagerNative.getDefault() 함수는 ActivityManagerProxy객체를 반환하는데, 이 객체는 액티비 매니저 서비스가 제공하는 IActivityManager 서비스 인터페이스 스반의 메서드들을 바인더 RPC를 통해서 호출한다. 따라서 액티비티 측에서는 이 객체를 통해 IActivityManager 인터페이스에 포함된 다양한 메서드를 자유롭게 이용 가능.
 
-정리
--------------
+2. ActivityManagerProxy 객체 - startSerivce()프록시 메서드 처리
+```
+    public ComponentName startService(IApplicationThread caller, 
+            Intent service, String resolvedType)
+    {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        
+        // 전송 data 생성 (인자값을 data에 저장)
+        data.writeStrongBinder(caller != null ? caller.asBinder() : null);
+        service.writeToParcel(data, 0);
+        data.writeString(resolvedType);
+        
+        // 바인더 RPC 데이터 전송
+        mRemote.transact(START_SERVICE_TRANSACTION, data, reply, 0);
+        ComponentName res = ComponentName.readFromParcel(reply);
+        
+        return res;
+    }
+```
+* ActivityManagerProxy객체의 주된 역할은 ActivityManagerNative 객체에 바인더 RPC데이터를 전송하는 것
+* mRemote.transact() 메서드는 자바 객체에서 바인더 RPC 데이터를 전송하는데 쓰인다. (START_SERVICE_TRANSACTION 트랙잭션을 통해 data전달)
+
+3. ActivityManagerNative 객체 - startService() 스텁 메서드 호출
+```
+    public boolean onTransact(int code, Parcel data, Parcel reply, int flags)
+    {
+        switch (code) {
+        ...
+        case START_SERVICE_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            IBinder b = data.readStrongBinder();
+            IApplicationThread app = ApplicationThreadNative.asInterface(b);
+            Intent service = Intent.CREATOR.createFromParcel(data);
+            String resolvedType = data.readString();
+            ComponentName cn = startService(app, service, resolvedType);
+            reply.writeNoException();
+            ComponentName.writeToParcel(cn, reply);
+            return true;
+        }
+        ...
+        }
+        return super.onTransact(code, data, reply, flags);
+    }
+```
+* ActivityManagerNative 객체는 ActivityManagerProxy객체에서 전달받은 RPC코드를 토대로 액티비티 매니저 서비스에서 호출한 스텁 메서드를 파악한다.
+* START_SERVICE_TRANSACTION RPC코드는 startServie() 스텁 메서드 호출
+* startService 스텁 메서드에 전달해야 할 인자를 구해서 호출해보자
+ + onTransact() 메서드의 data인자로 전달된 IActivityManager 서비스 인터페이스 기반의 바인더 RPC데이터를 언마샬링해서 startService() 스텁 메서드 호출
+<img src="https://user-images.githubusercontent.com/48199401/58653328-6cf30900-8350-11e9-86fc-fd642c7cb99c.jpg">
+* onTransact() 메서드는 ActivityManagerProxy의 startService() 프록시 메서드의 인자 값이 마샬링된 data변수(Parcel 객체)를 바인더 RPC를 통해 수신한 다음, data 변수를 언마샬링하고 각 데이터를 별도의 변수에 저장하는것
+* 저장된 변수를 인자로 삼아 액태비티 매니저 서비스의 startService() 스텁 메서드 호출
+
+### 액티비티 매니저 서비스 - startService() 스텁 메서드 실행
+지금까지는 서비스의 정보 전달 과정. 이제 액티비티 매니저 서비스가 요청받은 서비스를 어떻게 실행하는지(ActivityManagerService 클래스)
+```
+    public ComponentName startService(IApplicationThread caller, Intent service,
+            String resolvedType, int userId) {
+            
+            final int callingPid = Binder.getCallingPid();
+            final int callingUid = Binder.getCallingUid();
+
+            //주로 하는 일은 startServiceLocked() 호출하기
+            ComponentName res = startServiceLocked(caller, service,
+                    resolvedType, callingPid, callingUid, userId);
+                    
+            return res;
+        }
+    }
+```
+이 객체는 액티비티 매니저 서비스가 IApplicationThread 서비스 인터페이스 기반의 바인더 RPC를 통해  Controller 액티비티를 제어할 수 있도록 생성
+```
+    ComponentName startServiceLocked(IApplicationThread caller,
+            Intent service, String resolvedType,
+            int callingPid, int callingUid) {
+            ServiceLookupResult res =
+                retrieveServiceLocked(service, resolvedType,
+                        callingPid, callingUid);
+                        
+            ServiceRecord r = res.record;
+            bringUpServiceLocked(r, service.getFlags(), false);
+
+            return r.name;
+```
+* startServiceLocked()의 주요 역할은 실행할 서비스와 관련된 ServiceRecord값을 얻는 것이다. ServiceRecord는 안드로이드 애플리케이션 서비스에 대한 각종 정보가 담긴 클래스이다. 
+* startServiceLocked() 메서드는 retrieveServiceLocked() 메서드에 인텐트를 전달해서 서비스의 정보를 얻는다.
+* 이때 pid, uid정보를 같이 전달하는 이유는 서비스를 요청한 프로세스의 권한을 검사하고, 권한이 없는 프로세스가 특정 서비스를 실행하는것을 막을 수 있다.
+```
+    private final boolean bringUpServiceLocked(ServiceRecord r,
+            int intentFlags, boolean whileRestarting) 
+    {
+        final String appName = r.processName;
+        ProcessRecord app = getProcessRecordLocked(appName, r.appInfo.uid);
+        if (app != null && app.thread != null) {
+        // Process 생성을 하지 않고 바로 기존 프로세스 영역 내에서 서비스 실행
+            try {
+                realStartServiceLocked(r, app);
+                return true;
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Exception when starting service " + r.shortName, e);
+            }
+        }
+
+        startProcessLocked(appName, r.appInfo, true, intentFlags,
+                "service", r.name, false)
+        mPendingServices.add(r);
+        
+        return true;
+    }
+```
+* 우선 인자로 전달된 ServiceRecord객체를 참조해서 해당 서비스가 실행될 프로세스 이름과 uid를 통해 ProcessRecord객체가 이미 존재하는지 검색.
+* ProcessRecord가 이미 존재한다면 서비스가 실행될 프로세스가 이미 실행 중이므로 realStartServiceLocked()메서드를 통해 바로 해당 프로세스에서 서비스를 실행.
+* 액티비티 매니저 서비스가 추후에 새로 생성된 프로세스에게 RemoteService 실행을 요청하기 위해 mPendingServices배열에 ServiceRecord 객체 저장.
+
+```
+    private final ProcessRecord startProcessLocked(String processName,
+            ApplicationInfo info, boolean knownToBeDead, int intentFlags,
+            String hostingType, ComponentName hostingName, boolean allowWhileBooting) {
+            
+        // ProcessRecord 새로 생성
+        app = newProcessRecordLocked(null, info, processName);
+        
+        mProcessNames.put(processName, info.uid, app);
+        startProcessLocked(app, hostingType, hostingNameStr);
+        
+        return (app.pid != 0) ? app : null;
+    }
+    
+    private final void startProcessLocked(ProcessRecord app,
+            String hostingType, String hostingNameStr) {
+        int uid = app.info.uid;
+        int[] gids = null;
+        try {
+            gids = mContext.getPackageManager().getPackageGids(
+                    app.info.packageName);
+        } catch (PackageManager.NameNotFoundException e) {
+            Slog.w(TAG, "Unable to retrieve gids", e);
+        }
+        int pid = Process.start("android.app.ActivityThread",
+                mSimpleProcessManagement ? app.processName : null, uid, uid,
+                gids, debugFlags, null);
+        // 액티비티 매니저 서비스의 mPidSelfLocked 해시에
+        // 생성된 프로세스의 pid 값을 key로 해서 ProcessRecord 객체를 저장함.
+        this.mPidsSelfLocked.put(pid, app);
+```
+* ActivityManagerService에는 두개의 startProcessLocked()메서드가 존재
+* 첫 번째 startProcessLocked() 메서드는 리모트 서비스를 실행하기 위해 새로 생성할 프로세스의 정보를 포함하는 ProcessRecord객체를 만들고 mProcessNames 큐에 삽입하는것 이 과정이 끝나면 두 번째 startProcessLocked() 메서드 호출
+* 두 번째 startProcessLocked() 메서드의 역할은 Process 클래스의 start() 메서드를 통해 Zygote에게 android.app.ActivityThread 프로세스 생성을 요청하는 것
+
+### ActivityThread 클래스의 main() 메서드 실행
+
+
+### 액티비티 매니저 서비스 - attachApplication() 스텁 메서드 처리
+
