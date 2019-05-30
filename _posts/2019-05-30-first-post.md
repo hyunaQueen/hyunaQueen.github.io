@@ -64,8 +64,8 @@ public class ContextWrapper extends Context {
 }
 ```
 
-액티비티에서 startService() API를 호출하면 Activity 클래스가 상속하는 ContextWrapper 클래스의 startService가 호출된다. 
- * (b) ContextImpl 클래스 - startService() 메서드 처리
+* 액티비티에서 startService() API를 호출하면 Activity 클래스가 상속하는 ContextWrapper 클래스의 startService가 호출된다. 
+* (b) ContextImpl 클래스 - startService() 메서드 처리
  
 ```
     public ComponentName startService(Intent service) {
